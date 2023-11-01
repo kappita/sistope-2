@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
     sprintf(strFdMain, "%d", fd[1]);
     printf("%s", cells);
     char* args[] = {"broker", cells, workers, inPath, outPath, chunks, strConsole, strFdMain, NULL};
-    int bruh = execv("./broker", args);
+    execv("./broker", args);
     
   } else {
     // Lógica del proceso padre.
