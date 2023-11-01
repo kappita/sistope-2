@@ -12,7 +12,7 @@
 // Entradas: Char* (string), int* número de celdas
 // Salidas: bool
 // Descripción: Recibe el string de opt y verifica que sea un número válido y lo guarda en el puntero
-int handleNumber(char *opt, int *cells);
+int handleNumber(char *opt);
 // Entradas: Char* (string)
 // Salidas: bool
 // Descripción: Recibe el string de opt y verifica que sea un nombre de archivo válido

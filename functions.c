@@ -1,6 +1,6 @@
 #include "functions.h"
 
-int handleNumber(char *opt, int *cells) {
+int handleNumber(char *opt) {
   char *endptr;
   long num = strtol(opt, &endptr, 10);
 
@@ -13,7 +13,7 @@ int handleNumber(char *opt, int *cells) {
     printf("Por favor ingrese numero no negativo");
     return 0;
   }
-  *cells = (int)num;
+  
   return 1;
 }
 
@@ -24,14 +24,10 @@ int handleString(char *opt) {
       return 0;
     };
   }
-
- if (access(opt, F_OK) == -1){
-    // File doesn't exist or some other error occurred
-    printf("El archivo entregado no existe");
-    return 0;
-  }
   return 1;
 }
+
+
 
 material* createMaterial(int cellCount) {
   material* mat = (material*)malloc(sizeof(material));
