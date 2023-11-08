@@ -10,6 +10,10 @@
 
 #define SUBSET_SIZE 1000
 
+// Entrada: int
+// Salida: material*
+// Descripción: se le asigna memoria a las celdas a una variable tipo
+// material que contiene el numero de celdas y el arreglo con dicha cantidad de celdas
 material* createMaterial(int cellCount) {
   material* mat = (material*)malloc(sizeof(material));
   mat->cellCount = cellCount;
@@ -20,6 +24,11 @@ material* createMaterial(int cellCount) {
   return mat;
 }
 
+// Entrada: vacio
+// Salida: un nuevo pipe creado
+// Descripción: se asigna memoria a un nuevo pipe si este no fue creado
+// exitosamente entonces muestra un mensaje de error y termina la funcion
+// caso contrario retorna el nuevo pipe creado
 int* createSinglePipe() {
   int* newPipe = (int*)malloc(sizeof(int) * 2);
   if (pipe(newPipe) == -1) {
@@ -29,6 +38,11 @@ int* createSinglePipe() {
   return newPipe;
 }
 
+
+// Entrada: vacio
+// Salida: retorna un arreglo de entero pipes
+// Descripción: Se crea un par de pipes, para la comunicación
+// bidireccional entre procesos
 int** createDualPipe() {
   int** pipes = (int**)malloc(sizeof(int*) * 2);
   for (int j = 0; j < 2; j++) {
@@ -38,6 +52,11 @@ int** createDualPipe() {
 
 }
 
+// Entrada: int
+// Salida: int***
+// Descripción: se le asigna memoria a un puntero triple con la cantidad
+// de pipes a hacer, en cada celda tiene doble pipes y si no hay errores
+// lo retorna 
 int*** createPipes(int workerCount) {
   // Se deben crear dos pipes por worker
   int*** pipes = (int***)malloc(sizeof(int**) * workerCount);
@@ -48,7 +67,23 @@ int*** createPipes(int workerCount) {
   return pipes;
 }
 
+// Entrada: int***, int
+// Salida: void
+// Descripción: Libera la memoria alojada por los pipes
+void freePipes(int*** pipes, int workerCount) {
+  for (int i = 0; i < workerCount; i++) {
+    for (int j = 0; j < 2; j++) {
+      free(pipes[i][j]);
+    }
+    free(pipes[i]);
+  }
+  free(pipes);
+}
 
+// Entrada: int, char*, char*, int***, int*
+// Salida: void 
+// Descripción: se crean los workers y se les entregan los argumentos
+// necesarios
 void createWorkers(int workerCount, char* cellCountChar, char* chunkChar, int*** pipes, int* pids) {
   for (int i = 0; i < workerCount; i++) {
     int pid = fork();
@@ -81,6 +116,9 @@ void createWorkers(int workerCount, char* cellCountChar, char* chunkChar, int***
   }
 }
 
+// Entrada: int**, char*
+// Salida: void 
+// Descripción: Envía una línea de texto a un worker
 void sendLineToWorker(int** processPipes, char* line) {
   if (write(processPipes[PIPE_TO_C][PIPE_WRITE], line, BUFFER_MAX * sizeof(char)) < 0) {
     printf("Error enviando linea al worker");
@@ -88,6 +126,10 @@ void sendLineToWorker(int** processPipes, char* line) {
   }
 }
 
+
+// Entrada: int*, int**, int
+// Salida: void 
+// Descripción: lee la cantidad de lineas procesadas por un hijo
 void readReadLines(int* readLines, int** processPipes, int pipeNumber) {
   int i;
 
@@ -98,12 +140,18 @@ void readReadLines(int* readLines, int** processPipes, int pipeNumber) {
   readLines[pipeNumber] = i;
 }
 
+// Entrada: material*, double*
+// Salida: void
+// Descripción: agrega a cada una de las celdas del material las energias correspondientes
 void addEnergiesToMaterial(material* mat, double* energies) {
   for (int i = 0; i < mat->cellCount; i++) {
     mat->cells[i] = mat->cells[i] + energies[i];
   }
 }
 
+// Entrada: material*, double*, int, int
+// Salida: void
+// Descripción: agrega un subarreglo de energía al material
 void addCompositeEnergiesToMaterial(material* mat, double* energies, int index, int subsetSize) {
   int cap = subsetSize;
   if (mat->cellCount - index < subsetSize) {
@@ -113,13 +161,15 @@ void addCompositeEnergiesToMaterial(material* mat, double* energies, int index, 
   for (int i = 0; i < cap; i++) {
     mat->cells[index + i] += energies[i];
   }
-
 }
 
+// Entrada: material*, int**, int
+// Salida: void 
+// Descripción: lee el arreglo de energías del proceso hijo y los agrega al material
 void readEnergies(material* mat, int** processPipes, int pipeNumber) {  
   // Caso en el que el total de celdas es suficiente para enviarse
   // Por el pipe
-  if (mat->cellCount < 5000) {
+  if (mat->cellCount < 1000) {
     double energies[mat->cellCount];
     //double* energies = (double*)malloc(sizeof(double) * mat->cellCount);
     if (read(processPipes[PIPE_TO_P][PIPE_READ], energies, sizeof(double) * mat->cellCount) < 0) {
@@ -133,17 +183,18 @@ void readEnergies(material* mat, int** processPipes, int pipeNumber) {
   // el pipe
   for (int i = 0; i < mat->cellCount; i += SUBSET_SIZE) {
     double energies[SUBSET_SIZE];
-    //double* energies = (double*)malloc(sizeof(double) * SUBSET_SIZE);
     if (read(processPipes[PIPE_TO_P][PIPE_READ], energies, sizeof(double) * SUBSET_SIZE) < 0) {
       printf("Error leyendo cantidad de líneas del worker %d\n", pipeNumber);
       exit(1);
     }
     addCompositeEnergiesToMaterial(mat, energies, i, SUBSET_SIZE);
   }
-  
-  
 }
 
+// Entrada: material*, int, int***, int*
+// Salida: void
+// Descripción: Manda una señal a los workers para que terminen de 
+// leer líneas y lee sus resultados.
 void finishWorkers(material* mat, int workerCount, int*** pipes, int* readLines) {
   for (int i = 0; i < workerCount; i++) {
     write(pipes[i][PIPE_TO_C][PIPE_WRITE], "FIN", BUFFER_MAX * sizeof(char));
@@ -153,15 +204,23 @@ void finishWorkers(material* mat, int workerCount, int*** pipes, int* readLines)
   }
 }
 
+
+// Entrada: int, int*, int*, int
+// Salida: void
+// Descripción: muestra cuantas lineas leyo el pid de cada procesador o trabajador 
 void printWorkers(int workerCount, int* pids, int* readLines, int fdMain) {
   char line[128];
   for (int i = 0; i < workerCount; i++) {
     sprintf(line, "El worker %d con pid %d leyo %d lineas\n", i + 1, pids[i], readLines[i]);
     write(fdMain, line, strlen(line));
   }
+  free(readLines);
   return;
 }
 
+// Entradas: Material*
+// Salidas: int
+// Descripción: Obtiene la posición de la celda del material con mayor energía acumulada
 int getMaxEnergyCellPos(material* mat) {
   double max = 0;
   int pos;
@@ -174,6 +233,9 @@ int getMaxEnergyCellPos(material* mat) {
   return pos;
 }
 
+// Entrada: double
+// Salida: int
+// Descripción: Retorna la cantidad de caracteres de un número
 int getCharAmount(double number) {
   int i = 1;
   while (number >= 10) {
@@ -184,6 +246,10 @@ int getCharAmount(double number) {
   return i;
 }
 
+
+// Entrada: int, int, int, double, int, int
+// Salida: void
+// Descripción: Imprime la energía de una celda, de forma normalizada
 void printCell(int cellPos, int energyChars, int cellsChars, double cellEnergy, int cols, int fdMain) {
   char line[cols];
   sprintf(line, "%i", cellPos);
@@ -201,6 +267,9 @@ void printCell(int cellPos, int energyChars, int cellsChars, double cellEnergy, 
   return;
 }
 
+// Entrada: double, double, int
+// Salida: void
+// Descripción: Imprime de forma gráfica la energía de una celda
 void printCellEnergy(double cellEnergy, double part, int fdMain) {
   while (cellEnergy > part) {
     cellEnergy = cellEnergy - part;
@@ -210,6 +279,9 @@ void printCellEnergy(double cellEnergy, double part, int fdMain) {
   return;
 }
 
+// Entrada: material*, int
+// Salida: void
+// Descripción: imprime la energía almacenada por un material
 void printEnergy(material* mat, int fdMain) {
   struct winsize w;
   double maxEnergy = mat->cells[getMaxEnergyCellPos(mat)];
@@ -226,8 +298,9 @@ void printEnergy(material* mat, int fdMain) {
   return;
 }
 
-
-
+// Entrada: FILE*, int, int
+// Salida: void
+// Descripción: imprime la energia de una celda en el archivo de salida
 void writeCell(FILE *fp, int cellPos, int energyChars, int maxCellsChars, double cellEnergy) {
   fprintf(fp, "%i", cellPos);
   int cellChars = getCharAmount(cellPos);
@@ -242,7 +315,9 @@ void writeCell(FILE *fp, int cellPos, int energyChars, int maxCellsChars, double
   return;
 }
 
-
+// Entrada: FILE*, material*
+// Salida: void
+// Descripción: imprime la energía almacenada en un material en el archivo de salida
 void writeEnergy(FILE *fp, material* mat) {
   int maxEnergyPos = getMaxEnergyCellPos(mat);
   double maxEnergy = mat->cells[maxEnergyPos];
@@ -256,6 +331,9 @@ void writeEnergy(FILE *fp, material* mat) {
   return;
 }
 
+// Entrada: material*
+// Salida: void
+// Descripción: libera el espacio de memoria ocupado por material
 void freeMaterial(material* mat) {
   free(mat->cells);
   free(mat);

@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
   }
   
   freeMaterial(mat);
+  
   return 0;
 }
 

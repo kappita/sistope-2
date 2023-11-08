@@ -7,15 +7,16 @@
 
 
 int main(int argc, char* argv[]) {
+  // Lectura de argumentos
   int cellCount = atoi(argv[1]);
-
-  char fdCBuffer[BUFFER_MAX];
   int fd[2];
   // fd de lectura -> pipe[PIPE_TO_C][PIPE_READ]
   fd[PIPE_READ] = atoi(argv[2]);
   // fd de escritura -> pipe[PIPE_TO_P][PIPE_WRITE]
   fd[PIPE_WRITE] = atoi(argv[3]);
   int subsetSize = atoi(argv[4]);
+
+  char fdCBuffer[BUFFER_MAX];
   int done = 0;
   int readLines = 0;
   double* energies = createEnergyArray(cellCount);

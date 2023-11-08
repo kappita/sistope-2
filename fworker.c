@@ -1,6 +1,8 @@
 #include "fworker.h"
 
-
+// Entradas: int, int, int, int
+// Salidas: double
+// Descripción: hace el calculo de la formula de impacto con los datos ingresados
 double impactFormula(int cellPos, int impactedCellPos, int cellEnergy, int cellCount) {
   double result = (pow(10, 3) * cellEnergy) /
                   (cellCount * pow(abs(impactedCellPos - cellPos) + 1, 0.5));
@@ -10,7 +12,9 @@ double impactFormula(int cellPos, int impactedCellPos, int cellEnergy, int cellC
   return result;
 }
 
-
+// Entradas: double*, int, int, int
+// Salidas: void
+// Descripción: aplica la formula de impacto en un arreglo de energía
 void impactMaterial(double* energies, int cellCount, int particlePos, int particleEnergy) {
   // Se aplica la fórmula de impacto para cada celda del material
   for (int i = 0; i < cellCount; i++) {
@@ -20,7 +24,9 @@ void impactMaterial(double* energies, int cellCount, int particlePos, int partic
   return;
 }
 
-
+// Entradas: int
+// Salidas: double*
+// Descripción: crea un arreglo de energía, inicializando todos los valores en 0
 double* createEnergyArray(int size) {
   double* energies = (double*)malloc(sizeof(double) * size);
   for (int i = 0; i < size; i++) {
@@ -30,6 +36,9 @@ double* createEnergyArray(int size) {
 }
 
 
+// Entradas: double*, double*, int, int, int
+// Salidas: void
+// Descripción: Asigna la energía correspondiente a un subconjunto
 void subsetEnergies(double* energies, double* subset, int cellCount, int index, int subsetSize) {
   int cap = subsetSize;
   if (cellCount - index < subsetSize) {
@@ -41,6 +50,9 @@ void subsetEnergies(double* energies, double* subset, int cellCount, int index, 
   }
 }
 
+// Entradas: int, double*, int, int
+// Salidas: void
+// Descripción: Envía la energía calculada por el worker, en paquetes de menor tamaño
 void sendEnergiesToPipe(int fdToParent, double* energies, int cellCount, int subsetSize) {
   double* energySubset = createEnergyArray(subsetSize);
   for (int i = 0; i < cellCount; i += subsetSize) {
