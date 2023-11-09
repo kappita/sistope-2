@@ -171,7 +171,6 @@ void readEnergies(material* mat, int** processPipes, int pipeNumber) {
   // Por el pipe
   if (mat->cellCount < 1000) {
     double energies[mat->cellCount];
-    //double* energies = (double*)malloc(sizeof(double) * mat->cellCount);
     if (read(processPipes[PIPE_TO_P][PIPE_READ], energies, sizeof(double) * mat->cellCount) < 0) {
       printf("Error leyendo cantidad de líneas del worker %d\n", pipeNumber);
       exit(1);
@@ -196,8 +195,10 @@ void readEnergies(material* mat, int** processPipes, int pipeNumber) {
 // Descripción: Manda una señal a los workers para que terminen de 
 // leer líneas y lee sus resultados.
 void finishWorkers(material* mat, int workerCount, int*** pipes, int* readLines) {
+  char message[BUFFER_MAX];
+  sprintf(message, "FIN");
   for (int i = 0; i < workerCount; i++) {
-    write(pipes[i][PIPE_TO_C][PIPE_WRITE], "FIN", BUFFER_MAX * sizeof(char));
+    write(pipes[i][PIPE_TO_C][PIPE_WRITE], message, BUFFER_MAX * sizeof(char));
     // Lectura de número de líneas leídas
     readReadLines(readLines, pipes[i], i);
     readEnergies(mat, pipes[i], i);
@@ -270,6 +271,8 @@ void printCell(int cellPos, int energyChars, int cellsChars, double cellEnergy, 
 // Entrada: double, double, int
 // Salida: void
 // Descripción: Imprime de forma gráfica la energía de una celda
+//              utilizando el fd de la consola para imprimir en el
+//              proceso principal
 void printCellEnergy(double cellEnergy, double part, int fdMain) {
   while (cellEnergy > part) {
     cellEnergy = cellEnergy - part;
@@ -282,6 +285,8 @@ void printCellEnergy(double cellEnergy, double part, int fdMain) {
 // Entrada: material*, int
 // Salida: void
 // Descripción: imprime la energía almacenada por un material
+//              utilizando el fd de la consola para imprimir en el
+//              proceso principal
 void printEnergy(material* mat, int fdMain) {
   struct winsize w;
   double maxEnergy = mat->cells[getMaxEnergyCellPos(mat)];

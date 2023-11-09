@@ -38,17 +38,20 @@ int main(int argc, char* argv[]) {
   int turn;
   linesRead = 0;
   turn = rand() % workerCount;
+  // Se ignora la cantidad de líneas del archivo
   fgets(fdCBuffer, BUFFER_MAX, in);
+  // Se lee hasta que no queden líneas sin leer
   while (fgets(fdCBuffer, BUFFER_MAX, in) != NULL) {
     linesRead++;
     sendLineToWorker(pipes[turn], fdCBuffer);
+    // Si se alcanza el tamaño del chunk, se reasigna el turno a otro worker
     if (linesRead == chunk) {
       linesRead = 0;
       turn = rand() % workerCount;
     }
   }
   fclose(in);
-
+  // Se leen los resultados de los workers
   finishWorkers(mat, workerCount, pipes, readLines);
   writeEnergy(out, mat);
   fclose(out);
@@ -59,6 +62,7 @@ int main(int argc, char* argv[]) {
   }
   
   freeMaterial(mat);
+  freePipes(pipes, workerCount);
   
   return 0;
 }

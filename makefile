@@ -13,7 +13,7 @@ worker: worker.c fworker.o
 fworker: fworker.c
 	gcc -Wall -g fworker.c -o fworker.o -lm
 
-lab2: lab2.c functions.o
+lab2: lab2.c functions.o worker broker
 	gcc -Wall -g lab2.c functions.o -o lab2 -lm
 
 functions: functions.c

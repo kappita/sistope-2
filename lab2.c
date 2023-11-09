@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
 
       case 'o':
         if (!handleString(optarg)) {
+          printf("El nombre del archivo de salida no puede ser vacio\n");
           return 1;
         };
         gotOut = 1;
@@ -84,7 +85,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (gotOut == 0) {
-    outPath = "nashe.txt";
+    outPath = "resultados.txt";
   }
 
 
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]) {
     exit(1);
   }
 
-
+  // Copia el descriptor de la consola/terminal asociada al proceso
   dup2(STDOUT_FILENO, fd[1]);
 
 
