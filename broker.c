@@ -1,5 +1,12 @@
 #include "fbroker.h"
 
+// Entradas: Cantidad de celdas, cantidad de workers,
+//           ruta del archivo de entrada, ruta del
+//           archivo de salida, cantidad de chunks,
+//           bool de mensaje en consola, descriptor
+//           del proceso main 
+// Salida: int
+// Descripción: Ejecuta el broker
 int main(int argc, char* argv[]) {
   // Lectura de argumentos
   int cellCount = atoi(argv[1]);

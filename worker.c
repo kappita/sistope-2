@@ -4,8 +4,9 @@
 #define PIPE_READ 0
 #define PIPE_WRITE 1
 
-
-
+// Entrada: Cantidad de celdas, pipe de lectura, pipe de escritura, tamaño de subconjunto
+// Salida: int
+// Descripción: Ejecuta el worker
 int main(int argc, char* argv[]) {
   // Lectura de argumentos
   int cellCount = atoi(argv[1]);
@@ -29,7 +30,6 @@ int main(int argc, char* argv[]) {
       exit(1);
     }
     if (strcmp(fdCBuffer, "FIN") == 0) {
-      printf("Finalizando worker\n");
       done = 1;
       continue;
     }

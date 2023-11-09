@@ -5,6 +5,13 @@
 
 #define BUFFERMAX 16
 
+// Entrada: Cantidad de celdas, cantidad de workers, 
+//          ruta del archivo de entrada, ruta del
+//          archivo de salida, tamaño de los chunks
+//          de lectura de archivo, y bool representando
+//          si se imprime por consola o no.
+// Salida: int
+// Descripción: Ejecuta el laboratorio 2
 int main(int argc, char* argv[]) {
   int option;
   char* cells;
@@ -20,6 +27,7 @@ int main(int argc, char* argv[]) {
     switch (option) {
       case 'N':
         if (!handleNumber(optarg)) {
+          printf("La cantidad de celdas debe ser un numero positivo\n");
           return 1;
         }
         cells = optarg;
@@ -28,6 +36,7 @@ int main(int argc, char* argv[]) {
 
       case 'P':
         if (!handleNumber(optarg)) {
+          printf("La cantidad de workers debe ser un numero positivo\n");
           return 1;
         }
         workers = optarg;
@@ -36,6 +45,7 @@ int main(int argc, char* argv[]) {
 
       case 'i':
         if (!handleString(optarg)) {
+          printf("El nombre del archivo de entrada no puede ser vacio\n");
           return 1;
         }
         gotIn = 1;
@@ -52,6 +62,7 @@ int main(int argc, char* argv[]) {
 
       case 'c':
         if (!handleNumber(optarg)) {
+          printf("La cantidad de chunks debe ser un numero positivo\n");
           return 1;
         }
         chunks = optarg;
