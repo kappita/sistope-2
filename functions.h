@@ -18,3 +18,7 @@ int handleNumber(char *opt);
 // Descripción: Recibe el string de opt y verifica que sea un nombre de archivo válido
 int handleString(char *opt);
 
+// Entradas: char*
+// Salidas: bool
+// Descripcion: Determina si el archivo entregado existe
+int fileExists(char* fname);

@@ -29,3 +29,10 @@ int handleString(char *opt) {
   }
   return 1;
 }
+
+int fileExists(char *fname) {
+  if (access(fname, F_OK) == 0) {
+    return 1;
+  }
+  return 0;
+}

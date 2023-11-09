@@ -48,6 +48,10 @@ int main(int argc, char* argv[]) {
           printf("El nombre del archivo de entrada no puede ser vacio\n");
           return 1;
         }
+        if (!fileExists(optarg)) {
+          printf("El archivo de entrada no existe o no se encuentra en la misma carpeta que el programa\n");
+          return 1;
+        }
         gotIn = 1;
         inPath = optarg;
         break;
